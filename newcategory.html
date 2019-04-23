@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+    <body>
+            <h2>Available {{x.category}} are :</h2>
+        {% for i in items%}
+        
+        <p>Name-{{i.name}}</p>
+        <p>Description-{{i.description}}</p>
+        <p>Price-{{i.price}}</p>
+        <p>Offer-{{i.offer}}</p>
+       <p> <a href='{{url_for('DeleteItem', supermart_category_id=supermart_category_id ,category_id=i.id)}}'>
+            Delete Item</a>
+            </p>
+        {%endfor%}
+        <a href = '{{url_for('AddNewItem', supermart_category_id = supermart_category_id) }}'>
+            Add New Item</a>
+            <br>
+            
+    
+    </body>
+</html>
