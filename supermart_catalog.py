@@ -63,6 +63,25 @@ def AddNewItem(supermart_category_id):
     else:
         return render_template('newitem.html', supermart_category_id=supermart_category_id)
 
+@app.route('/supermart/<int:supermart_category_id>/<int:category_id>/edititem', methods=['GET' ,'POST'])
+def EditItem(supermart_category_id, category_id):
+        editCategoryItem=session.query(Categories).filter_by(supermart_category_id=supermart_category_id,id=category_id).one()
+        if request.method== 'POST':
+            if request.form['name']:
+                editCategoryItem.name=request.form['name']
+            if request.form['description']:
+                editCategoryItem.description=request.form['description']
+            if request.form['price']:
+                editCategoryItem.price=request.form['price']
+            if request.form['offer']:
+                editCategoryItem.offer=request.form['offer']
+            session.add(editCategoryItem)
+            session.commit()
+            return redirect(url_for('ShowCategory',supermart_category_id=supermart_category_id))
+        else:
+            return render_template('edititem.html',supermart_category_id=supermart_category_id,category_id=category_id, x=editCategoryItem)    
+    
+
 
 @app.route('/supermart/<int:supermart_category_id>/<int:category_id>/deleteitem', methods=['GET', 'POST'])
 def DeleteItem(supermart_category_id, category_id):
