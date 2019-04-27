@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, jsonify, flash
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database import Base, SuperMart, Categories
@@ -19,6 +19,13 @@ app = Flask(__name__)
 def SuperMartCategories():
     items = session.query(SuperMart).all()
     return render_template('supermartcategory.html', items=items)
+
+# ADDED JSON END POINT
+@app.route('/')
+@app.route('/supermart/JSON')
+def SuperMartCategoriesJSON():
+    items = session.query(SuperMart).all()
+    return jsonify(Category=[i.serialize for i in items])
 
 
 @app.route('/supermart/addcategory/', methods=['GET', 'POST'])
@@ -50,6 +57,25 @@ def ShowCategory(supermart_category_id):
     items = session.query(Categories).filter_by(
         supermart_category_id=supermart_category_id)
     return render_template('newcategory.html', supermart_category_id=supermart_category_id, items=items, x=supermart)
+
+
+#ADDED JSON END POINT
+
+@app.route('/supermart/<int:supermart_category_id>/JSON')
+def ShowCategoryJSON(supermart_category_id):
+    supermart = session.query(SuperMart).filter_by(
+        id=supermart_category_id).one()
+    items = session.query(Categories).filter_by(
+        supermart_category_id=supermart_category_id)
+    return jsonify(SupermartCategory=[i.serialize for i in items])
+
+
+# ADDED JSON END POINT
+@app.route('/supermart/<int:supermart_category_id>/<int:category_id>/JSON')
+def ShowItemCategoryJSON(supermart_category_id,category_id):
+    itemCategory = session.query(Categories).filter_by(
+        id=category_id).one()
+    return jsonify(CategoryItem=itemCategory.serialize)
 
 
 @app.route('/supermart/<int:supermart_category_id>/additems/', methods=['GET', 'POST'])
