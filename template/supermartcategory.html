@@ -3,6 +3,16 @@
 
 <body>
     <h1 align="center"><u>WELCOME TO SUPERMART</u></h1>
+    <h1 align="center"><u>WELCOME TO SUPERMART</u></h1>
+    {% with messages= get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+        {% for m in messages %}
+        <li>{{m}}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
     {% for i in items %}
     <p><a href='{{url_for('ShowCategory', supermart_category_id= i.id) }}'>{{i.category}}</a></p>
     <p><a href='{{url_for('DeleteCategory', supermart_category_id=i.id) }}'>Delete Category</a></p>
