@@ -1,0 +1,44 @@
+body,html{
+    /* background-color:greenyellow; */
+   /* background-image: url("images.jpeg"); */
+    height: 100%;
+    width:100%;
+
+
+}
+.bg {
+    /* The image used */
+    background-image: url("rippled_wall_background_01_hd_pictures_169887.jpg");
+  
+    /* Full height */
+    height: 100%; 
+    width:100%;
+  
+    /* Center and scale the image nicely */
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+h1{
+ font-family:"Georgia", serif;
+    font-size:40px;
+   
+}
+.style
+{
+    font-size:35px;
+    
+}
+a:link {
+    color:black;
+    text-decoration: none;
+  }
+  
+  a:visited {
+      color:black;
+    text-decoration: none;
+  }
+  
+  a:hover {
+      color:black;
+    text-decoration: underline;
+  }
