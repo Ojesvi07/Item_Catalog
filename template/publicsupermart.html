@@ -1,0 +1,9 @@
+<!doctype html>
+<html>
+    <body>
+        <h1 ><center>WELCOME TO SUPERMART</center></h1>
+        {% for i in items %}
+    <p><a href='{{url_for('ShowCategory', supermart_category_id= i.id) }}'>{{i.category}}</a></p>
+    {%endfor%}
+    </body>
+</html>
