@@ -1,4 +1,4 @@
-#ITEM-CATALOG(SUPERMART)
+# ITEM-CATALOG(SUPERMART)
 
 
 This application provides a list of categories available in the supermart and further list of items available for each given category.
@@ -11,19 +11,19 @@ This application had JSON end points.
 
 
 ## INSTALLATION
--VirtualBox
--Vagrant
--Python 
--Flask
+- VirtualBox
+- Vagrant
+- Python 
+- Flask
 
-##FILES INCLUDED
--database.py
--supermart.db(without users)
--supermartwithusers.db
--SuperMartCatalog (python code)
--template (folder having all template files)
--static (folder having css files)
-client_secrets.json (json file having client id)
+## FILES INCLUDED
+- database.py
+- supermart.db(without users)
+- supermartwithusers.db
+- SuperMartCatalog (python code)
+- template (folder having all template files)
+- static (folder having css files)
+- client_secrets.json (json file having client id)
 
 ## HOW TO RUN
 
