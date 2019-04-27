@@ -27,14 +27,14 @@ This application had JSON end points.
 
 ## HOW TO RUN
 
-Clone this repository
-Open virtual machine  and change directory to the above one
-Use vagrant up and vagrant ssh
-Now run the python code using python3 SuperMartCatalog.py command
-Open your browser and type url localhost:5000
-To login and perform CRUD operations visit localhost:5000/login
-Further you can use add,delete,edit commands after logingin.
-Also JSON end points are added which can be used like localhost:5000/supermart/JSON
+- Clone this repository
+- Open virtual machine  and change directory to the above one
+- Use vagrant up and vagrant ssh
+- Now run the python code using python3 SuperMartCatalog.py command
+- Open your browser and type url localhost:5000
+- To login and perform CRUD operations visit localhost:5000/login
+- Further you can use add,delete,edit commands after logingin.
+- Also JSON end points are added which can be used like localhost:5000/supermart/JSON
 
  
 
