@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request, jsonify, flash
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database import Base, SuperMart, Categories
+from database import Base, SuperMart, Categories, USER
 
 from flask import make_response
 import json
@@ -9,10 +9,12 @@ import httplib2
 from oauth2client.client import FlowExchangeError
 from oauth2client.client import flow_from_clientsecrets
 from flask import session as login_session
+import string
+import requests
 app = Flask(__name__)
 
 
-engine = create_engine('sqlite:///supermart.db')
+engine = create_engine('sqlite:///supermartwithusers.db')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
@@ -20,8 +22,8 @@ session = DBSession()
 
 app = Flask(__name__)
 
-CLIENT_ID=json.loads(open('client_secrets.json',
-                          'r').read())['web']['client_id']
+CLIENT_ID = json.loads(open('client_secrets.json',
+                            'r').read())['web']['client_id']
 
 
 @app.route('/login')
@@ -107,6 +109,11 @@ def gconnect():
     login_session['username'] = data['name']
     login_session['email'] = data['email']
 
+    user_id = getUserId(login_session['email'])
+    if not user_id:
+        user_id = CreateUser(login_session)
+    login_session['user_id'] = user_id
+
     output = ''
     output += '<h1>Welcome, '
     output += login_session['username']
@@ -114,24 +121,45 @@ def gconnect():
     return output
 
 
+def CreateUser(login_session):
+    newuser = USER(
+        username=login_session['username'], email=login_session['email'])
+    session.add(newuser)
+    session.commit()
+    user = session.query(USER).filter_by(email=login_session['email']).one()
+    return user.id
+
+
+def GetUserInfo(user_id):
+    user = session.query(USER).filter_by(id=user_id).one()
+    return user
+
+
+def getUserId(email):
+    try:
+        user = session.query(USER).filter_by(email=email).one()
+        return user.id
+    except:
+        return None
 
 
 @app.route('/gdisconnect')
 def gdisconnect():
     access_token = login_session.get('access_token')
     if access_token is None:
-        print ('Access Token is None')
-        response = make_response(json.dumps('Current user not connected.'), 401)
+        print('Access Token is None')
+        response = make_response(json.dumps(
+            'Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
-    print ('In gdisconnect access token is %s', access_token)
-    print ('User name is: ')
-    print (login_session['username'])
+    print('In gdisconnect access token is %s', access_token)
+    print('User name is: ')
+    print(login_session['username'])
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
-    print ('result is ')
-    print (result)
+    print('result is ')
+    print(result)
     if result['status'] == '200':
         del login_session['access_token']
         del login_session['gplus_id']
@@ -141,18 +169,20 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     else:
-        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        response = make_response(json.dumps(
+            'Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
         return response
-
-
 
 
 @app.route('/')
 @app.route('/supermart/')
 def SuperMartCategories():
     items = session.query(SuperMart).all()
-    return render_template('supermartcategory.html', items=items)
+    if 'username' not in login_session:
+        return render_template('publicsupermart.html', items=items)
+    else:
+        return render_template('supermartcategory.html', items=items)
 
 # ADDED JSON END POINT
 @app.route('/')
@@ -164,9 +194,12 @@ def SuperMartCategoriesJSON():
 
 @app.route('/supermart/addcategory/', methods=['GET', 'POST'])
 def AddCategory():
-
+    if 'username' not in login_session:
+        return redirect('/login')
     if request.method == 'POST':
-        newCategory = SuperMart(category=request.form['category'])
+
+        newCategory = SuperMart(
+            category=request.form['category'], user_id=login_session["user_id"])
         session.add(newCategory)
         session.commit()
         flash("NEW CATEGORY ADDED TO SUPERMART !")
@@ -174,15 +207,19 @@ def AddCategory():
     else:
         return render_template('addcategory.html')
 
-@app.route('/supermart/<int:supermart_category_id>/deletecategory',methods=['GET','POST'])
+
+@app.route('/supermart/<int:supermart_category_id>/deletecategory', methods=['GET', 'POST'])
 def DeleteCategory(supermart_category_id):
-    deleteCategory=session.query(SuperMart).filter_by(id=supermart_category_id).one()
+    deleteCategory = session.query(SuperMart).filter_by(
+        id=supermart_category_id).one()
+    if 'username' not in login_session:
+        return redirect('/login')
     if request.method == 'POST':
         session.delete(deleteCategory)
         session.commit()
         return redirect(url_for('SuperMartCategories'))
     else:
-        return render_template('deletecategory.html',supermart_category_id=supermart_category_id,x=deleteCategory)
+        return render_template('deletecategory.html', supermart_category_id=supermart_category_id, x=deleteCategory)
 
 
 @app.route('/supermart/<int:supermart_category_id>/')
@@ -191,10 +228,13 @@ def ShowCategory(supermart_category_id):
         id=supermart_category_id).one()
     items = session.query(Categories).filter_by(
         supermart_category_id=supermart_category_id)
-    return render_template('newcategory.html', supermart_category_id=supermart_category_id, items=items, x=supermart)
+    if 'username' not in login_session:
+        return render_template('publicshowcategory.html', supermart_category_id=supermart_category_id, items=items, x=supermart)
+    else:
+        return render_template('newcategory.html', supermart_category_id=supermart_category_id, items=items, x=supermart)
 
 
-#ADDED JSON END POINT
+# ADDED JSON END POINT
 
 @app.route('/supermart/<int:supermart_category_id>/JSON')
 def ShowCategoryJSON(supermart_category_id):
@@ -207,7 +247,7 @@ def ShowCategoryJSON(supermart_category_id):
 
 # ADDED JSON END POINT
 @app.route('/supermart/<int:supermart_category_id>/<int:category_id>/JSON')
-def ShowItemCategoryJSON(supermart_category_id,category_id):
+def ShowItemCategoryJSON(supermart_category_id, category_id):
     itemCategory = session.query(Categories).filter_by(
         id=category_id).one()
     return jsonify(CategoryItem=itemCategory.serialize)
@@ -215,46 +255,53 @@ def ShowItemCategoryJSON(supermart_category_id,category_id):
 
 @app.route('/supermart/<int:supermart_category_id>/additems/', methods=['GET', 'POST'])
 def AddNewItem(supermart_category_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     if request.method == 'POST':
         newCategoryItem = Categories(name=request.form['name'], description=request.form['description'],
-                                     price=request.form['price'], offer=request.form['offer'], supermart_category_id=supermart_category_id)
+                                     price=request.form['price'], offer=request.form['offer'], supermart_category_id=supermart_category_id, user_id=login_session["user_id"])
         session.add(newCategoryItem)
         session.commit()
         return redirect(url_for('ShowCategory', supermart_category_id=supermart_category_id))
     else:
         return render_template('newitem.html', supermart_category_id=supermart_category_id)
 
-@app.route('/supermart/<int:supermart_category_id>/<int:category_id>/edititem', methods=['GET' ,'POST'])
+
+@app.route('/supermart/<int:supermart_category_id>/<int:category_id>/edititem', methods=['GET', 'POST'])
 def EditItem(supermart_category_id, category_id):
-        editCategoryItem=session.query(Categories).filter_by(supermart_category_id=supermart_category_id,id=category_id).one()
-        if request.method== 'POST':
-            if request.form['name']:
-                editCategoryItem.name=request.form['name']
-            if request.form['description']:
-                editCategoryItem.description=request.form['description']
-            if request.form['price']:
-                editCategoryItem.price=request.form['price']
-            if request.form['offer']:
-                editCategoryItem.offer=request.form['offer']
-            session.add(editCategoryItem)
-            session.commit()
-            flash("Item edited !")
-            return redirect(url_for('ShowCategory',supermart_category_id=supermart_category_id))
-        else:
-            return render_template('edititem.html',supermart_category_id=supermart_category_id,category_id=category_id, x=editCategoryItem)    
-    
+    editCategoryItem = session.query(Categories).filter_by(
+        supermart_category_id=supermart_category_id, id=category_id).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        if request.form['name']:
+            editCategoryItem.name = request.form['name']
+        if request.form['description']:
+            editCategoryItem.description = request.form['description']
+        if request.form['price']:
+            editCategoryItem.price = request.form['price']
+        if request.form['offer']:
+            editCategoryItem.offer = request.form['offer']
+        session.add(editCategoryItem)
+        session.commit()
+        flash("Item edited !")
+        return redirect(url_for('ShowCategory', supermart_category_id=supermart_category_id))
+    else:
+        return render_template('edititem.html', supermart_category_id=supermart_category_id, category_id=category_id, x=editCategoryItem)
 
 
 @app.route('/supermart/<int:supermart_category_id>/<int:category_id>/deleteitem', methods=['GET', 'POST'])
 def DeleteItem(supermart_category_id, category_id):
     deleteItem = session.query(Categories).filter_by(
         supermart_category_id=supermart_category_id, id=category_id).one()
+    if 'username' not in login_session:
+        return redirect('/login')
     if request.method == 'GET':
         return render_template('deleteitem.html', supermart_category_id=supermart_category_id, category_id=category_id, x=deleteItem)
-    if request.method== 'POST':
+    if request.method == 'POST':
         session.delete(deleteItem)
         session.commit()
-        return redirect(url_for('ShowCategory',supermart_category_id=supermart_category_id))
+        return redirect(url_for('ShowCategory', supermart_category_id=supermart_category_id))
 
 
 if __name__ == '__main__':
