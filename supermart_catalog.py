@@ -35,6 +35,7 @@ def AddCategory():
         newCategory = SuperMart(category=request.form['category'])
         session.add(newCategory)
         session.commit()
+        flash("NEW CATEGORY ADDED TO SUPERMART !")
         return redirect(url_for('SuperMartCategories'))
     else:
         return render_template('addcategory.html')
@@ -103,6 +104,7 @@ def EditItem(supermart_category_id, category_id):
                 editCategoryItem.offer=request.form['offer']
             session.add(editCategoryItem)
             session.commit()
+            flash("Item edited !")
             return redirect(url_for('ShowCategory',supermart_category_id=supermart_category_id))
         else:
             return render_template('edititem.html',supermart_category_id=supermart_category_id,category_id=category_id, x=editCategoryItem)    
