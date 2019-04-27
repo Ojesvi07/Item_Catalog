@@ -142,6 +142,7 @@ def getUserId(email):
 
 
 
+#LOGOUT USING /gdisconnect
 
 @app.route('/gdisconnect')
 def gdisconnect():
@@ -172,7 +173,7 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
 
-
+#MAIN SUPERMART APP PAGE
 @app.route('/')
 @app.route('/supermart/')
 def SuperMartCategories():
@@ -189,7 +190,7 @@ def SuperMartCategoriesJSON():
     items = session.query(SuperMart).all()
     return jsonify(Category=[i.serialize for i in items])
 
-
+#TO ADD CATEGORY TO SUPERMART
 @app.route('/supermart/addcategory/', methods=['GET', 'POST'])
 def AddCategory():
     if 'username' not in login_session:
@@ -203,7 +204,7 @@ def AddCategory():
     else:
         return render_template('addcategory.html')
 
-
+#TO DELETE CATEGORY FROM SUPERMART
 @app.route('/supermart/<int:supermart_category_id>/deletecategory', methods=['GET', 'POST'])
 def DeleteCategory(supermart_category_id):
     deleteCategory = session.query(SuperMart).filter_by(
@@ -217,7 +218,7 @@ def DeleteCategory(supermart_category_id):
     else:
         return render_template('deletecategory.html', supermart_category_id= supermart_category_id, x=deleteCategory)
 
-
+#TO VIEW SPECIFIC SUPERMART CATEGORY
 @app.route('/supermart/<int:supermart_category_id>/')
 def ShowCategory(supermart_category_id):
     supermart = session.query(SuperMart).filter_by(
@@ -249,7 +250,7 @@ def ShowItemCategoryJSON(supermart_category_id, category_id):
     return jsonify(CategoryItem=itemCategory.serialize)
 
 
-
+#TO ADD ITEMS OF A PARTICULAR CATEGORY
 @app.route('/supermart/<int:supermart_category_id>/additems/', methods=['GET', 'POST'])
 def AddNewItem(supermart_category_id):
     if 'username' not in login_session:
@@ -264,7 +265,7 @@ def AddNewItem(supermart_category_id):
     else:
         return render_template('newitem.html', supermart_category_id=supermart_category_id)
 
-
+#TO DELETE ITEM 
 @app.route('/supermart/<int:supermart_category_id>/<int:category_id>/deleteitem', methods=['GET', 'POST'])
 def DeleteItem(supermart_category_id, category_id):
     if 'username' not in login_session:
@@ -278,7 +279,7 @@ def DeleteItem(supermart_category_id, category_id):
         session.commit()
         return redirect(url_for('ShowCategory', supermart_category_id=supermart_category_id))
 
-
+#TO EDIT AN ITEM
 @app.route('/supermart/<int:supermart_category_id>/<int:category_id>/edititem', methods=['GET', 'POST'])
 def EditItem(supermart_category_id, category_id):
     if 'username' not in login_session:
