@@ -1,8 +1,12 @@
 <!doctype html>
 <html>
+        <head>
+                <link rel=stylesheet type=text/css href="{{ url_for('static', filename='first.css') }}">
+            </head>
+            
 
 <body>
-    <h1 align="center"><u>WELCOME TO SUPERMART</u></h1>
+    <div class="bg">
     <h1 align="center"><u>WELCOME TO SUPERMART</u></h1>
     {% with messages= get_flashed_messages() %}
     {% if messages %}
@@ -14,12 +18,12 @@
     {% endif %}
     {% endwith %}
     {% for i in items %}
-    <p><a href='{{url_for('ShowCategory', supermart_category_id= i.id) }}'>{{i.category}}</a></p>
+    <p class="style"><a href='{{url_for('ShowCategory', supermart_category_id= i.id) }}'>{{i.category}}</a></p>
     <p><a href='{{url_for('DeleteCategory', supermart_category_id=i.id) }}'>Delete Category</a></p>
     {%endfor%}
     <a href = '{{url_for('AddCategory') }}'>
         ADD NEW CATEGORY</a>
-
+</div>
 
 
 

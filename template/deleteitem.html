@@ -1,6 +1,10 @@
 <!doctype html>
 <html>
+        <head>
+                <link rel=stylesheet type=text/css href="{{ url_for('static', filename='first.css') }}">
+            </head>
     <body>
+        <div class="bg">
         <h2>ARE YOU SURE YOU WANT TO DELETE?</h2>
         <h3>{{x.name}}</h3>
         <br>
@@ -10,7 +14,7 @@
             <input type='submit' value='Delete Item'>
             </form>
 
-        
+        </div>
         
     </body>
 </html>

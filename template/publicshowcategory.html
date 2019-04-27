@@ -1,6 +1,10 @@
 <!DOCTYPE HTML>
 <html>
+        <head>
+                <link rel=stylesheet type=text/css href="{{ url_for('static', filename='first.css') }}">
+            </head>
     <body>
+        <div class="bg">
         {%for i in items%}
 
         
@@ -9,5 +13,6 @@
         <p>Price-{{i.price}}</p>
         <p>Offer-{{i.offer}}</p>
         {%endfor%}
+    </div>
     </body>
 </html>
